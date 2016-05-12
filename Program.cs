@@ -13,7 +13,10 @@ namespace ALGAMES
                     Test(args[1]);
                     return;
                 }
-                
+            else
+                {
+                    
+                }  
         }
             
         private static void Test(string Test)
