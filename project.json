@@ -1,21 +1,17 @@
 {
   "version": "1.0.0-*",
-  "compilationOptions": {
+  "buildOptions": {
     "emitEntryPoint": true
   },
   "dependencies": {
-        "NETStandard.Library": "1.0.0-rc3-23829"
-        
-         
-    },
-    "commands":
-    {
-        "test": "xunit.runner.dnx"
-    },
-    "frameworks": {
-        "dnxcore50": { 
-            
-        }
-       
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-3002702"
     }
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": "dnxcore50"
+    }
+  }
 }

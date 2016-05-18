@@ -8,7 +8,6 @@ namespace ALGAMES.MatrixBoardGames
        public Tuple<int,int>[] GetFreePositions(int[,] board, int NumberOfMovesDone) {
            //TODO:Improve: after  NumberOfMovesDone>(board.GetLength(0)* board.GetLength(1))/2 
             //start visiting de rows at board.GetLength(1)-1
-            //, beacuse it will be  lesser rows to visit
              List<Tuple<int, int>> freePos = new List<Tuple<int, int>>();
              Queue<int> ColsToReviewForFreePlaces = new Queue<int>();
               if (board.GetLength(0) < 1)
@@ -18,7 +17,7 @@ namespace ALGAMES.MatrixBoardGames
 
               for (int j = 0; j < board.GetLength(1); j++)
               {
-                  if (board[0, j] < 0)
+                  if (board[board.GetLength(0)-1, j] < 0)
                   {
                       freePos.Add(new Tuple<int, int>(0, j));
 
@@ -31,7 +30,7 @@ namespace ALGAMES.MatrixBoardGames
               }
 
               
-              int i=board.GetLength(0);
+              int i=board.GetLength(0)-2;
               while( i>=0 && ColsToReviewForFreePlaces.Count>0)
               {
                     var auxQueue = new Queue<int>();
@@ -44,20 +43,21 @@ namespace ALGAMES.MatrixBoardGames
                         }
                         else
                         {
-                            auxQueue.Enqueue(i);
+                            auxQueue.Enqueue(col);
                         }
                     }
               
                    ColsToReviewForFreePlaces=auxQueue; 
+                   i--;
               }
 
 
 
               return (freePos.ToArray());
        }
-        public int Evaluate (int[,] board, int WinId,Tuple<int,int>[] freePos,Tuple<int,int> PosEvaluating) {
+        public int Evaluate (int[,] board, int WinId, int NumberOfMovsDone) {
            
-            var nonFreePos = GetNonFreePos(board, freePos);
+            var nonFreePos = GetNonFreePos(board, NumberOfMovsDone);
             int result = -1;
             bool valWins = false;
             int val = -1;
@@ -65,7 +65,7 @@ namespace ALGAMES.MatrixBoardGames
             {
                 var adjacents = GetAdjacentPositions(board, pos.Item1, pos.Item2);
                 val = board[pos.Item1, pos.Item2];
-                //max of four iterations
+                //max four iterations
                 foreach (var adj in adjacents)
                 {
                     if (board[adj.Item1, adj.Item2] == val)
@@ -100,18 +100,19 @@ namespace ALGAMES.MatrixBoardGames
             }
             return (result);
         }
-        public List<Tuple<int, int>> GetNonFreePos(int[,] board, Tuple<int,int>[] freePos)
+        public List<Tuple<int, int>> GetNonFreePos(int[,] board, int NumberOfMovsDone)
             {
                 List<Tuple<int, int>> nonFreePos = new List<Tuple<int, int>>();
-                foreach(var pos in freePos)
+                var freePos=GetFreePositions(board,NumberOfMovsDone);
+                foreach (var pos in freePos )
                 {
-                    int col=pos.Item2;
-                    for (int i = pos.Item1-1; i>=0; i--)
+                    int i=pos.Item1+1;
+                    while(i<board.GetUpperBound(0))
                     {
-                            nonFreePos.Add(new Tuple<int,int>(i,col));
+                        nonFreePos.Add(new Tuple<int,int>(i,pos.Item2));
+                        i++;
                     }
                 }
-
                 return (nonFreePos);
             }
         public bool checkInBounds(Tuple<int, int> pos, int[,] board)
@@ -160,7 +161,8 @@ namespace ALGAMES.MatrixBoardGames
 
             return (res);
         }
-  
-  }
+
+       
+    }
     
 }
