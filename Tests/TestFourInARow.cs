@@ -14,56 +14,20 @@ namespace  ALGAMES
                            {0,1,1,1}
                  };
         var rules= new NInARowBoardGameRules();
-        writer.WriteLine($"TestForAEasyWin.\nInitial Board\n{board.convertToString()}");
+        writer.WriteLine($"TestForAEasyWin.\nInitial Board\n{board.convertToStringImproved()}");
         MatrixBoardGameBackTracking b=new MatrixBoardGameBackTracking(rules);
         
         int result;
+        //next will be 0 if oponent wins, 1 if bot wins, 2 not resolved,3 if draw 
         var move=b.GetNextMove(board,17,8,0,1, out result);
         board[move.Item1,move.Item2]=0;
-        writer.WriteLine($"Board After move\n{board.convertToString()}");
+        writer.WriteLine($"Board After move\n{board.convertToStringImproved()}");
         
-        writer.WriteLine($"Test Result:{(result).ToString()}");
-        
-        
-        }
-        private void TestAvoidForASureLose(System.IO.TextWriter writer)
-        {
-            int[,] board={
-                           {1,0,1},
-                           {-1,0,0},
-                           {-1,1,-1}
-                 };
-        writer.WriteLine($"TestForASureLose.Initial Board\n {board.convertToString()}");
-        writer.WriteLine($"Boot goes with 1");
-        var b=new TicTacToeBackTracking();
-        int result;
-        var move=b.GetNextMove(board,6,2,1,0, out result);
-        board[move.Item1,move.Item2]=1;
-        writer.WriteLine($"Board After move\n {board.convertToString()}");
-        
-        writer.WriteLine($"Test Result:(draw) {result==3}");
+        writer.WriteLine($"Test Result:{(result==1).ToString()}");
         
         
         }
-        private void TestInitialMovement(System.IO.TextWriter writer)
-        {
-            int[,] board={
-                           {-1,-1,-1},
-                           {-1,-1,-1},
-                           {-1,-1,-1}
-                 };
-        writer.WriteLine($"TestInitialMovement.Initial Board\n {board.convertToString()}");
-        writer.WriteLine($"Boot goes with 1");
-        var b=new TicTacToeBackTracking();
-        int result;
-        var move=b.GetNextMove(board,0,2,1,0, out result);
-        board[move.Item1,move.Item2]=1;
-        writer.WriteLine($"Board After move\n {board.convertToString()}");
-        
-        writer.WriteLine($"Test Result:(not defined) {result}");
-        
-        
-        }
+      
         
        
     }

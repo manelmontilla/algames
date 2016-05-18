@@ -14,14 +14,20 @@ namespace ALGAMES.MatrixBoardGames
          
          
         //resturns nextmove if the game is not finished, otherwise null.  
-        //next will be 0 if oponent wins, 1 if bot wins, 2 not resolved,3 if draw  
+        //next will be 0 if oponent wins, 1 if bot wins, 2 not resolved,3 if draw 
+        //if the game is finished then next will be -1 
         public Tuple<int, int> GetNextMove(int[,] CurrentBoard,
         int NumberOfMovsDone,int SearchDepth,  
         int WinId, int LoseId, out int next)
         {
 
            var searchList = this.Rules.GetFreePositions(CurrentBoard, NumberOfMovsDone);
-            var loBound = CurrentBoard.GetLength(0);
+           if(searchList.Length==0)
+           {
+               next=-1;
+               return null;
+           }
+           var loBound = CurrentBoard.GetLength(0);
             var hiBound = CurrentBoard.GetLength(1);
             next = -1;
             Tuple<int, int> move = null;

@@ -19,7 +19,7 @@ namespace ALGAMES.MatrixBoardGames
               {
                   if (board[board.GetLength(0)-1, j] < 0)
                   {
-                      freePos.Add(new Tuple<int, int>(0, j));
+                      freePos.Add(new Tuple<int, int>(board.GetLength(0)-1, j));
 
                   }
                   else
@@ -137,7 +137,8 @@ namespace ALGAMES.MatrixBoardGames
             NOfValsLeft--;
             return findPath(board, next, NOfValsLeft, NextInPath);
         }
-  
+        
+        
   
         public List<Tuple<int, int>> GetAdjacentPositions(int[,] board, int i, int j)
         {

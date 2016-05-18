@@ -1,6 +1,6 @@
 ﻿using System;
 using static System.Console;
-
+using ALGAMES.PlayBots;
 
 namespace ALGAMES
 {
@@ -8,14 +8,15 @@ namespace ALGAMES
     {
         public static void Main(string[] args)
         {
-            if(args[0]=="Test")
+            if(args.Length>0 && args[0]=="Test")
                 {
                     Test(args[1]);
                     return;
                 }
             else
                 {
-                    
+                    FourInARowCLBot bot=new FourInARowCLBot();
+                    bot.Play();
                 }  
         }
             
