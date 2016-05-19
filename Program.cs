@@ -16,7 +16,27 @@ namespace ALGAMES
             else
                 {
                     FourInARowCLBot bot=new FourInARowCLBot();
-                    bot.Play();
+                    if(args.Length>0)
+                    {
+                        //star game from a file
+                        var str=System.IO.File.ReadAllText("game.json");
+                        var game=GameUtils.DeSerializeFromJson(str);
+                        
+                        bot.Game=game;
+                        if(args.Length>1)
+                        {
+                            
+                            int backto=int.Parse(args[1]);
+                            game.BackTo(backto);
+                        }
+                        bot.ResumeGame();
+                    }
+                    else
+                    {
+                        bot.Play();    
+                    }
+                    
+                    
                 }  
         }
             

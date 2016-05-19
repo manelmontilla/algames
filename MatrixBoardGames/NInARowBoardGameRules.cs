@@ -72,7 +72,7 @@ namespace ALGAMES.MatrixBoardGames
                     {
                         int drow, crow;
                         PathDistance(pos, adj, out drow, out crow);
-                        valWins = findPath(board, adj, WINROWLEGTH - 2, current =>
+                        valWins = findPath(board, adj, WINROWLEGTH-2, current =>
                         {
                             Tuple<int, int> res = new Tuple<int, int>(current.Item1 + drow, current.Item2 + crow);
                             if (checkInBounds(res, board))
@@ -102,17 +102,33 @@ namespace ALGAMES.MatrixBoardGames
         }
         public List<Tuple<int, int>> GetNonFreePos(int[,] board, int NumberOfMovsDone)
             {
+                //TODO:improve bad design!!
                 List<Tuple<int, int>> nonFreePos = new List<Tuple<int, int>>();
                 var freePos=GetFreePositions(board,NumberOfMovsDone);
+                
                 foreach (var pos in freePos )
                 {
-                    int i=pos.Item1+1;
-                    while(i<board.GetUpperBound(0))
+                    
+                  int i=pos.Item1+1;
+                    
+                    while(i<board.GetLength(0))
                     {
                         nonFreePos.Add(new Tuple<int,int>(i,pos.Item2));
                         i++;
                     }
                 }
+                //firts row bad having to do this thig
+                
+                for(int j=0;j<board.GetLength(1);j++)
+                {
+                    if(board[0,j]>=0)
+                       { for (int i = 0; i < board.GetLength(0); i++)
+                        {
+                             nonFreePos.Add(new Tuple<int,int>(i,j));
+                        }
+                       }
+                }
+                
                 return (nonFreePos);
             }
         public bool checkInBounds(Tuple<int, int> pos, int[,] board)

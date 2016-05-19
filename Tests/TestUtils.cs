@@ -39,7 +39,7 @@ namespace ALGAMES
                  sb.Append(j);
              }
              sb.Append("\n");
-             sb.Append("".PadRight((arr.GetLength(1)*2)+2,'_'));
+             sb.Append("".PadRight((arr.GetLength(1)*2)+1,'_'));
             sb.Append("\n");
             for(int i=0;i<arr.GetLength(0);i++)
             {
@@ -55,7 +55,7 @@ namespace ALGAMES
                      sb.Append(strVal);
                      sb.Append("|");
                 }
-             
+              sb.Append("".PadRight((arr.GetLength(1)*2)+1,'_'));
               sb.Append("\n");
             }
              

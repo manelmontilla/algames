@@ -1,29 +1,22 @@
 using System;
 using ALGAMES.MatrixBoardGames;
 using static System.Console;
+using System.Collections.Generic;
+using System.IO;
+
 namespace  ALGAMES.PlayBots
 {
     public class FourInARowCLBot
     {
-        const int ROWS=6;
-        const int  COLS=7;
        
-        const int SEARCHDEPTH=5;
-       
-        const int BOT_TOKEN=0;
+        public FourInArowGame Game{get;set;}=new FourInArowGame ();
         
-        const int OPONENT_TOKEN=1;
-         
-        int[,] board=new int[ROWS,COLS];
-        
-        int nextMovePlayerToken=-1;
-        int numberOfMovementsDone=0;
         
         private int MovementsLeft
         {
             get 
             {
-                var res=this.b.Rules.GetFreePositions(this.board,numberOfMovementsDone);
+                var res=this.b.Rules.GetFreePositions(this.Game.board,this.Game.numberOfMovementsDone);
                 return(res.Length);
             }
         }
@@ -37,36 +30,46 @@ namespace  ALGAMES.PlayBots
         
         public void Play()
         {
-            board.Reset();
-            numberOfMovementsDone=0;
-            this.nextMovePlayerToken=BOT_TOKEN;
+            this.Game.board.Reset();
+            this.Game.numberOfMovementsDone=0;
+            this.Game.nextMovePlayerToken=this.Game.Oponent_Token;
+            ResumeGame();
+        }
+        
+        public void ResumeGame()
+        {
+            WriteLine($"current board:\n");
+            Game.board.PrintToConsole();
             bool exit=false;
             while(!exit)
             {
-                if(this.nextMovePlayerToken==BOT_TOKEN)
+                if(this.Game.nextMovePlayerToken==Game.Bot_Token)
                 {
                     int result;
                     var botMove=GetBotMove(out result);
                     WriteLine($"Bot moves to {botMove.GetStringRepr()}");
-                    WriteLine($"current board:\n{board.convertToString()}");
-                    nextMovePlayerToken=OPONENT_TOKEN;
+                    WriteLine($"current board:\n");
+                    Game.board.PrintToConsole();
+                    Game.nextMovePlayerToken=Game.Oponent_Token;
                     exit=EvaluateBotStatus(result);
                  }
             
                 else
                 {
                     Tuple<int,int> movement=AskForOponentMove();
-                    board[movement.Item1,movement.Item2]=OPONENT_TOKEN;
-                    numberOfMovementsDone++;
-                    WriteLine($"current board:\n{board.convertToString()}");
-                    var res=b.Rules.Evaluate(board,BOT_TOKEN,numberOfMovementsDone);
+                    Game.board[movement.Item1,movement.Item2]=Game.Oponent_Token;
+                    Game.movementsDone.Add(movement);
+                    Game.numberOfMovementsDone++;
+                    WriteLine($"current board:\n");
+                    Game.board.PrintToConsole();
+                    var res=b.Rules.Evaluate(Game.board,Game.Oponent_Token,Game.numberOfMovementsDone);
                     exit=EvaluateOponentStatus(res);
-                    nextMovePlayerToken=BOT_TOKEN;
+                    Game.nextMovePlayerToken=Game.Bot_Token;
                 }
                 
             }
         }
-
+        
         private Tuple<int, int> AskForOponentMove()
         {
             bool correct=false;
@@ -79,12 +82,32 @@ namespace  ALGAMES.PlayBots
                 pos=movement.MovementFromString(out okey);     
                 if(okey)
                 {
-                    correct=board.IsValidMove(pos);    
+                    correct=Game.board.IsValidMove(pos);    
+                }
+                else
+                {
+                    if(IsSaveGameCommand(movement))
+                        SaveToFile(Game);
                 }
             }
             return(pos);
         }
-        
+
+        public void SaveToFile(FourInArowGame game)
+        {
+            //TODO make working on widows put filename in a constant
+            var val=game.SerializeToJson();
+            string fileName=$"game.json";
+            File.WriteAllText(fileName,val);
+            WriteLine($"Game saved to {fileName}");
+        }
+
+        private bool IsSaveGameCommand(string input)
+        {
+            bool ret=false;
+            ret=input.IndexOf("save",StringComparison.OrdinalIgnoreCase)>=0;
+            return(ret);
+        }
         
         private bool EvaluateBotStatus(int result)
         {
@@ -134,6 +157,9 @@ namespace  ALGAMES.PlayBots
             
            return(exit);
         }
+         //resturns nextmove if the game is not finished, otherwise null.  
+        //next will be 0 if oponent wins, 1 if bot wins, 2 not resolved,3 if draw 
+        //if the game is finished then next will be -1 
         private bool EvaluateOponentStatus(int result)
         {
             bool exit=false;
@@ -141,13 +167,13 @@ namespace  ALGAMES.PlayBots
             {
                 case 0:
                     
-                         WriteLine("You win!! well done");
+                         WriteLine("I win this time!!");
                          exit=true;
                     
                     break;
                  case 1:
                    
-                         WriteLine("I win!!");
+                         WriteLine(" You win well done!!");
                          exit=true;
                    
                     break;
@@ -158,7 +184,7 @@ namespace  ALGAMES.PlayBots
                    
                     break;
                 default:
-                    
+                    WriteLine($"I really don't know.. result:{result}");
                 break;
             }
             
@@ -170,10 +196,11 @@ namespace  ALGAMES.PlayBots
         public Tuple<int,int> GetBotMove(out int result)
         {
             WriteLine("Bot deciding next movement..");
-            var move=b.GetNextMove(this.board,this.numberOfMovementsDone,SEARCHDEPTH,BOT_TOKEN
-            ,OPONENT_TOKEN, out result);
-             this.numberOfMovementsDone++;
-             this.board[move.Item1,move.Item2]=BOT_TOKEN;
+            var move=b.GetNextMove(this.Game.board,this.Game.numberOfMovementsDone,Game.SearchDepth,Game.Bot_Token
+            ,Game.Oponent_Token, out result);
+             this.Game.numberOfMovementsDone++;
+             this.Game.board[move.Item1,move.Item2]=Game.Bot_Token;
+             Game.movementsDone.Add(move);
             return(move);
             
         

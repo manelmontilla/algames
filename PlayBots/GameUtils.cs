@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+
 namespace  ALGAMES.PlayBots
 {
-    public  static  class BoardUtils {
+    public  static  class GameUtils {
         
     public static int RowLength(this int[,] arr)
     {
@@ -55,7 +56,7 @@ namespace  ALGAMES.PlayBots
        {
            Ok=false;
            Tuple<int,int> res=null;
-           var parts=Input.Split(" ".ToCharArray(),StringSplitOptions.RemoveEmptyEntries);
+           var parts=Input.Split(",".ToCharArray(),StringSplitOptions.RemoveEmptyEntries);
            if(parts.Length<2)
             {
                 return(res);
@@ -100,13 +101,44 @@ namespace  ALGAMES.PlayBots
              
               sb.Append("\n");
             }
-             
+            sb.Append("".PadRight((arr.GetLength(1)*2)+1,'_'));   
           
-            sb.Append("");
+            sb.Append("\n");
             Console.Write(sb.ToString());
             
         }
- 
+        
+        public static string SerializeToJson(this FourInArowGame game)
+        {
+            Newtonsoft.Json.JsonSerializer ser=new Newtonsoft.Json.JsonSerializer();
+            System.IO.StringWriter sw=new System.IO.StringWriter();
+            ser.Serialize(sw,game);
+            return(sw.ToString());
+        }
+        public static FourInArowGame DeSerializeFromJson(string str)
+        {
+            FourInArowGame game;
+            game=Newtonsoft.Json.JsonConvert.DeserializeObject<FourInArowGame>(str);
+            return(game);
+        }
+        
+        public static void BackTo(this FourInArowGame game,int movement)
+        {
+            for (int i = game.numberOfMovementsDone; i >=movement ; i--)
+            {
+                game.BackOneMove();
+            }
+        }
+        
+        public static void BackOneMove(this FourInArowGame game)
+        {
+            game.numberOfMovementsDone--;
+            var move=game.movementsDone.Last();
+            game.board[move.Item1,move.Item2]=-1;
+            game.movementsDone.Remove(move);
+            
+            game.nextMovePlayerToken=game.nextMovePlayerToken==game.Bot_Token?game.Oponent_Token:game.Bot_Token;
+        }
     }
 
 }
