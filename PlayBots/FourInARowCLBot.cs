@@ -21,11 +21,11 @@ namespace  ALGAMES.PlayBots
             }
         }
         
-        MatrixBoardGameBackTracking b=null;
+        MatrixBoardGameMiniMax b=null;
         public FourInARowCLBot()
         {
             var rules= new NInARowBoardGameRules();
-            b=new MatrixBoardGameBackTracking(rules);
+            b=new MatrixBoardGameMiniMax(rules);
         }
         
         public void Play()
@@ -127,28 +127,16 @@ namespace  ALGAMES.PlayBots
                     }
                     break;
                  case 1:
-                    if(this.MovementsLeft>0)
-                    {
-                        WriteLine("I'm going to win!! but well played!!");
-                        
-                    }
-                    else
-                    {
+                    
                          WriteLine("I win!!");
                          exit=true;
-                    }
+                    
                     break;
                  case 3:
-                    if(this.MovementsLeft>0)
-                    {
-                        WriteLine(" We are going to Tie!!");
-                        
-                    }
-                    else
-                    {
+                    
                          WriteLine("We tied!!");
                          exit=true;
-                    }
+                    
                     break;
                 default:
                     

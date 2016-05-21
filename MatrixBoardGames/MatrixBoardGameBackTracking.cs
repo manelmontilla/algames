@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 namespace ALGAMES.MatrixBoardGames
 {
-    public class MatrixBoardGameBackTracking
+    public class MatrixBoardGameMiniMax
     {
         
          public IMatrixBoardGameRules Rules{get;private set;} 
          
-         public MatrixBoardGameBackTracking(IMatrixBoardGameRules Rules)
+         public MatrixBoardGameMiniMax(IMatrixBoardGameRules Rules)
          {
              this.Rules=Rules;
          }

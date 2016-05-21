@@ -15,7 +15,7 @@ namespace  ALGAMES
                  };
         var rules= new NInARowBoardGameRules();
         writer.WriteLine($"TestForAEasyWin.\nInitial Board\n{board.convertToStringImproved()}");
-        MatrixBoardGameBackTracking b=new MatrixBoardGameBackTracking(rules);
+        MatrixBoardGameMiniMax b=new MatrixBoardGameMiniMax(rules);
         
         int result;
         //next will be 0 if oponent wins, 1 if bot wins, 2 not resolved,3 if draw 

@@ -77,12 +77,14 @@ namespace  ALGAMES.PlayBots
         {
             StringBuilder sb=new StringBuilder("\n"); 
              //write header
+            
+             sb.Append("\n");
+             //sb.Append("  ".PadRight((arr.GetLength(1)*2)+2,'_'));
+             sb.Append(" ");
              for(int j=0;j<arr.GetLength(1);j++)
              {
-                 sb.Append(j);
+                 sb.Append(" "+j);
              }
-             sb.Append("\n");
-             sb.Append("".PadRight((arr.GetLength(1)*2)+1,'_'));
             sb.Append("\n");
             for(int i=0;i<arr.GetLength(0);i++)
             {
@@ -90,7 +92,7 @@ namespace  ALGAMES.PlayBots
                 {
                     if(j==0)
                     {
-                        sb.Append("|");
+                        sb.Append($"{i}|");
                     }
                    
                     var val=arr[i,j];
@@ -101,7 +103,7 @@ namespace  ALGAMES.PlayBots
              
               sb.Append("\n");
             }
-            sb.Append("".PadRight((arr.GetLength(1)*2)+1,'_'));   
+            //sb.Append(" ".PadRight((arr.GetLength(1)*2)+1,'_'));   
           
             sb.Append("\n");
             Console.Write(sb.ToString());
