@@ -31,18 +31,18 @@ namespace ALGAMES.PlayBots
             arr.SetValues(val => -1);
         }
 
-        public static bool IsValidMove(this int[,] arr, Tuple<int, int> pos)
+        public static bool IsValidMove(this int[,] arr, (int row, int col) pos)
         {
-            bool isValid = pos.Item1 >= 0 && pos.Item2 >= 0 && pos.Item1 < arr.RowLength() && pos.Item2 < arr.ColLength();
-            isValid = isValid && arr[pos.Item1, pos.Item2] < 0;
+            bool isValid = pos.row >= 0 && pos.col >= 0 && pos.row < arr.RowLength() && pos.col < arr.ColLength();
+            isValid = isValid && arr[pos.row, pos.col] < 0;
             if (pos.Item1 < arr.RowLength() - 1)
             {
-                isValid = isValid && arr[pos.Item1 + 1, pos.Item2] >= 0;
+                isValid = isValid && arr[pos.row + 1, pos.col] >= 0;
             }
             return (isValid);
         }
 
-        public static string GetStringRepr(this Tuple<int, int> pos)
+        public static string GetStringRepr(this (int, int) pos)
         {
             return ($"({pos.Item1},{pos.Item2})");
         }
@@ -52,25 +52,23 @@ namespace ALGAMES.PlayBots
              {1,"1"}
           };
 
-        public static Tuple<int, int> MovementFromString(this string Input, out bool Ok)
+        public static (int row, int col) MovementFromString(this string Input, out bool Ok)
         {
             Ok = false;
-            Tuple<int, int> res = null;
             var parts = Input.Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length < 2)
             {
-                return (res);
+                return (-1, -1);
             }
             int row;
             Ok = int.TryParse(parts[0], out row);
             if (!Ok)
-                return (res);
+                return (-1, -1);
             int col;
             Ok = int.TryParse(parts[1], out col);
             if (!Ok)
-                return (res);
-            res = new Tuple<int, int>(row, col);
-            return (res);
+                return (-1, -1);
+            return (row, col);
 
         }
         public static void PrintToConsole(this int[,] arr)
@@ -131,7 +129,7 @@ namespace ALGAMES.PlayBots
         {
             game.NumberOfMovementsDone--;
             var move = game.MovementsDone.Last();
-            game.board[move.Item1, move.Item2] = -1;
+            game.board[move.row, move.col] = -1;
             game.MovementsDone.Remove(move);
             game.NextMovePlayerToken = game.NextMovePlayerToken == game.Bot_Token ? game.Opponent_Token : game.Bot_Token;
         }

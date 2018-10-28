@@ -45,38 +45,37 @@ namespace ALGAMES.PlayBots
             {
                 if (this.Game.NextMovePlayerToken == Game.Bot_Token)
                 {
-                    int result;
-                    var botMove = GetBotMove(out result);
-                    WriteLine($"Bot moves to {botMove.GetStringRepr()}");
+                    var botMove = GetBotMove();
+                    WriteLine($"Bot moves to {botMove.pos.GetStringRepr()}");
                     WriteLine($"current board:\n");
                     Game.board.PrintToConsole();
                     Game.NextMovePlayerToken = Game.Opponent_Token;
-                    exit = EvaluateBotStatus(result);
+                    exit = EvaluateBotStatus(botMove.result);
                 }
 
                 else
                 {
-                    Tuple<int, int> movement = AskForOponentMove();
-                    Game.board[movement.Item1, movement.Item2] = Game.Opponent_Token;
+                    var movement = AskForOpponentMove();
+                    Game.board[movement.row, movement.col] = Game.Opponent_Token;
                     Game.MovementsDone.Add(movement);
                     Game.NumberOfMovementsDone++;
                     WriteLine($"current board:\n");
                     Game.board.PrintToConsole();
                     var res = b.Rules.Evaluate(Game.board, Game.Opponent_Token, Game.NumberOfMovementsDone);
-                    exit = EvaluateOponentStatus(res);
+                    exit = EvaluateOpponentStatus(res);
                     Game.NextMovePlayerToken = Game.Bot_Token;
                 }
 
             }
         }
 
-        private Tuple<int, int> AskForOponentMove()
+        private (int row, int col) AskForOpponentMove()
         {
             bool correct = false;
-            Tuple<int, int> pos = null;
+            (int row, int col) pos = (-1, -1);
             while (!correct)
             {
-                WriteLine("Enter you movement in format row,col");
+                WriteLine("Enter your movement in format row,col");
                 string movement = ReadLine();
                 bool okey;
                 pos = movement.MovementFromString(out okey);
@@ -145,31 +144,23 @@ namespace ALGAMES.PlayBots
 
             return (exit);
         }
-        //resturns nextmove if the game is not finished, otherwise null.  
-        //next will be 0 if oponent wins, 1 if bot wins, 2 not resolved,3 if draw 
-        //if the game is finished then next will be -1 
-        private bool EvaluateOponentStatus(int result)
+
+        private bool EvaluateOpponentStatus(int result)
         {
             bool exit = false;
             switch (result)
             {
                 case 0:
-
                     WriteLine("I win this time!!");
                     exit = true;
-
                     break;
                 case 1:
-
-                    WriteLine(" You win well done!!");
+                    WriteLine("You win well done!!");
                     exit = true;
-
                     break;
                 case 3:
-
                     WriteLine("We tied!!");
                     exit = true;
-
                     break;
                 default:
                     WriteLine($"I really don't know.. result:{result}");
@@ -178,20 +169,19 @@ namespace ALGAMES.PlayBots
 
             return (exit);
         }
-        //resturns nextmove if the game is not finished, otherwise null.  
-        //next will be 0 if oponent wins, 1 if bot wins, 2 not resolved,3 if draw 
-        //if the game is finished then next will be -1 
-        public Tuple<int, int> GetBotMove(out int result)
+
+        // Returns nextmove if the game is not finished, otherwise null.  
+        // Next will be 0 if oponent wins, 1 if bot wins, 2 not resolved,3 if draw. 
+        // if the game is finished then result will be -1 
+        public (int result, (int, int) pos) GetBotMove()
         {
             WriteLine("Bot deciding next movement..");
-            var move = b.GetNextMove(this.Game.board, this.Game.NumberOfMovementsDone, Game.SearchDepth, Game.Bot_Token
-            , Game.Opponent_Token, out result);
+            var (res, pos) = b.GetNextMove(this.Game.board, this.Game.NumberOfMovementsDone, Game.SearchDepth, Game.Bot_Token
+            , Game.Opponent_Token);
             this.Game.NumberOfMovementsDone++;
-            this.Game.board[move.Item1, move.Item2] = Game.Bot_Token;
-            Game.MovementsDone.Add(move);
-            return (move);
-
-
+            this.Game.board[pos.row, pos.column] = Game.Bot_Token;
+            Game.MovementsDone.Add(pos);
+            return (res, pos);
         }
 
 

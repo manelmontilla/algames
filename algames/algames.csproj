@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AssemblyName>algames</AssemblyName>
-    <OutputType>Exe</OutputType>
     <RuntimeFrameworkVersion>2.1.3</RuntimeFrameworkVersion>
     <PackageId>algames</PackageId>
   </PropertyGroup>

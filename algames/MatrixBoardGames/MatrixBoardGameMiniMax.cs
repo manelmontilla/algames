@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 namespace ALGAMES.MatrixBoardGames
 {
     public class MatrixBoardGameMiniMax
@@ -29,30 +30,27 @@ namespace ALGAMES.MatrixBoardGames
         /// -1 if the game is already finished.
         /// </param>
         /// <returns>The position the program wants to move for the next movement.</returns>
-        public Tuple<int, int> GetNextMove(int[,] CurrentBoard,
+        public (int next, (int row, int column) pos) GetNextMove(int[,] CurrentBoard,
         int NumberOfMovsDone, int SearchDepth,
-        int WinId, int LoseId, out int next)
+        int WinId, int LoseId)
         {
-
             var searchList = this.Rules.GetFreePositions(CurrentBoard, NumberOfMovsDone);
             if (searchList.Length == 0)
             {
-                next = -1;
-                return null;
+                return (-1, (0, 0));
             }
             var loBound = CurrentBoard.GetLength(0);
             var hiBound = CurrentBoard.GetLength(1);
-            next = -1;
-            Tuple<int, int> move = null;
-            bool stop = false;
+            (int column, int row) move = (0, 0);
             int i = 0;
             // 0 opponent wins, 1 bot wins, 2 not resolved, 3 draw.
-            List<Tuple<int, int>>[] candidates = new List<Tuple<int, int>>[4];
-            candidates[0] = new List<Tuple<int, int>>();
-            candidates[1] = new List<Tuple<int, int>>();
-            candidates[2] = new List<Tuple<int, int>>();
-            candidates[3] = new List<Tuple<int, int>>();
-            while (i < searchList.Length && !stop)
+            List<(int, int)>[] candidates = new List<(int, int)>[4]{
+               new List<(int, int)>(),
+               new List<(int, int)>(),
+               new List<(int, int)>(),
+               new List<(int, int)>(),
+            };
+            while (i < searchList.Length)
             {
                 var pos = searchList[i];
                 var nextBoard = new int[loBound, hiBound];
@@ -60,20 +58,16 @@ namespace ALGAMES.MatrixBoardGames
                 nextBoard[pos.Item1, pos.Item2] = WinId;
                 var res = Rules.Evaluate(nextBoard, WinId, NumberOfMovsDone + 1);
                 candidates[res].Add(pos);
+                // res == 1 means the bot wins the game with this movement.
+                // so we can return immediately.
                 if (res == 1)
                 {
-
-                    stop = true;
-                    move = pos;
-                    next = 1;
+                    return (1, (pos));
                 }
                 i++;
             }
-            // Program wins with this movement !!.
-            if (stop)
-                return (move);
-            
-            // Any movements not making program lose or draw ?
+
+            // Any movements not making program lose or draw ?.
             if (candidates[2].Count > 0)
             {
                 // TODO: Improve the selection criteria using some heuristics. 
@@ -82,30 +76,25 @@ namespace ALGAMES.MatrixBoardGames
                 {
                     move = candidates[2][0];
                     // 0 opponent wins, 1 if bot wins, 2 not resolved, 3 draw.
-                    next = 2;
-                    return (move);
+                    return (2, (move));
                 }
 
                 var CandidatesSim = Simulate(CurrentBoard, candidates[2], NumberOfMovsDone + 1, SearchDepth, WinId, LoseId);
-                var res = ChooseMovement(CandidatesSim.ToArray());
-                move = new Tuple<int, int>(res.Item1, res.Item2);
-                next = res.Item3;
+                return ChooseMovement(CandidatesSim.ToArray());
             }
-            // Movements making bot draw
+            // Movements making bot draw. result = 3.
             else if (candidates[3].Count > 0)
             {
                 // Pick one
-                move = candidates[3][0];
-                next = 3;
+                return (3, candidates[3][0]);
+
             }
             else
             {
                 // Program loses the match :(
                 move = candidates[0][0];
-                next = 3;
+                return (0, move);
             }
-
-            return (move);
         }
 
         /// <summary>
@@ -115,42 +104,40 @@ namespace ALGAMES.MatrixBoardGames
         ///  in the first two columns and a the outcome of that position in the third column.
         /// </param>
         /// <returns>The chosen movement.</returns>
-        public Tuple<int, int, int> ChooseMovement(Tuple<int, int, int>[] simulateResults)
+        public (int result, (int, int)) ChooseMovement((int result, (int, int))[] simulateResults)
         {
             if (simulateResults.Length < 1)
-                throw new ArgumentException("simulateResults must have at least one result");
-            Tuple<int, int, int> res = new Tuple<int, int, int>(simulateResults[0].Item1, simulateResults[0].Item2, simulateResults[0].Item3);
-            if (simulateResults[0].Item3 == 1)
-                return res;
+                throw new ArgumentException("simulateResults needs at least one result");
+            (int result, (int, int)) current = simulateResults[0];
+            // if the first movement makes the bot win choose that one.
+            if (current.result == 1)
+                return current;
             // Return 0 if opponent wins, 1 if bot wins, 2 not resolved, 3 draw.
             bool exit = false;
             int i = 1;
             while (i < simulateResults.Length && !exit)
             {
-                var result = simulateResults[i].Item3;
-                if (result == 1)
+                if (this.isBetter(current.result, simulateResults[i].result))
                 {
-                    res = simulateResults[i];
-                    exit = true;
+                    current = simulateResults[i];
                 }
-                else if (result == 2 && res.Item3 == 0)
-                {
-                    res = simulateResults[i];
-                }
-                else if (result == 2 && res.Item3 == 3)
-                {
-                    // go for win!!
-                    
-                    res = simulateResults[i];
-                }
-                else if (result == 3 && res.Item3 == 2)
-                {
-                    // go for a win!!
-                    res = simulateResults[i];
-                }
+                exit = (current.result == 1);
                 i++;
             }
-            return (res);
+            return (current);
+        }
+
+        public bool isBetter(int current, int candidate)
+        {
+            // 0 if opponent wins, 1 if bot wins, 2 not resolved, 3 draw.
+            int[][] compareTable = new int[4][];
+            compareTable[0] = new int[] { 1, 2, 3 };
+            compareTable[1] = new int[] { 1 };
+            compareTable[2] = new int[] { 1 };
+            compareTable[3] = new int[] { 1, 2 };
+
+            return compareTable[current].Where(x => x == candidate).Count() > 0;
+
         }
 
         /// <summary>
@@ -163,28 +150,25 @@ namespace ALGAMES.MatrixBoardGames
         /// <param name="WinId"></param>
         /// <param name="LoseId"></param>
         /// <returns></returns>
-        public List<Tuple<int, int, int>> Simulate(int[,] CurrentBoard, List<Tuple<int, int>> candidates,
+        public List<(int res, (int, int))> Simulate(int[,] CurrentBoard, List<(int row, int col)> candidates,
        int NumberOfMovsDone, int SearchDepth, int WinId, int LoseId)
         {
-            List<Tuple<int, int, int>> res = new List<Tuple<int, int, int>>();
+            List<(int res, (int, int))> res = new List<(int, (int, int))>();
             var loBound = CurrentBoard.GetLength(0);
             var hiBound = CurrentBoard.GetLength(1);
             foreach (var candidate in candidates)
             {
                 var nextBoard = new int[loBound, hiBound];
                 Array.Copy(CurrentBoard, nextBoard, CurrentBoard.Length);
-                nextBoard[candidate.Item1, candidate.Item2] = WinId;
-                int moveResult;
-                var move = GetNextMove(nextBoard, NumberOfMovsDone + 1, SearchDepth, LoseId, WinId, out moveResult);
+                nextBoard[candidate.row, candidate.col] = WinId;
+                var (moveResult, _) = GetNextMove(nextBoard, NumberOfMovsDone + 1, SearchDepth, LoseId, WinId);
                 if (moveResult == 1)
                     moveResult = 0;
                 else if (moveResult == 0)
                 {
                     moveResult = 1;
                 }
-
-                Tuple<int, int, int> currenRes = new Tuple<int, int, int>(candidate.Item1, candidate.Item2, moveResult);
-                res.Add(currenRes);
+                res.Add((moveResult, (candidate)));
             }
             return (res);
         }

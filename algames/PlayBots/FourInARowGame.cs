@@ -8,7 +8,7 @@ namespace ALGAMES.PlayBots
         public int Rows { get; set; } = 6;
         public int Cols { get; set; } = 7;
 
-        public int SearchDepth { get; set; } = 7;
+        public int SearchDepth { get; set; } = 3;
 
         public int Bot_Token { get; set; } = 0;
 
@@ -17,10 +17,10 @@ namespace ALGAMES.PlayBots
         public int[,] board { get; set; } = new int[6, 7];
 
         public int NextMovePlayerToken { get; set; } = -1;
-       
+
         public int NumberOfMovementsDone { get; set; } = 0;
-        
-        public List<Tuple<int, int>> MovementsDone { get; set; } = new List<Tuple<int, int>>();
+
+        public List<(int row, int col)> MovementsDone { get; set; } = new List<(int, int)>();
     }
 
 }
