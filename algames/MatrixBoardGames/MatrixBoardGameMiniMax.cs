@@ -151,7 +151,8 @@ namespace ALGAMES.MatrixBoardGames
 
 
         /// <summary>
-        /// Simulates a the game of up to the specified Depth for a set of non terminal game positions.
+        /// Simulates a the game for a set of non terminal game positions.
+        /// The method expands the game tree only up to the specified Depth.  
         /// </summary>
         /// <param name="CurrentBoard"></param>
         /// <param name="candidates"></param>
