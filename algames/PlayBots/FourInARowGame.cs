@@ -8,7 +8,7 @@ namespace ALGAMES.PlayBots
         public int Rows { get; set; } = 6;
         public int Cols { get; set; } = 7;
 
-        public int SearchDepth { get; set; } = 3;
+        public int SearchDepth { get; set; } = 4;
 
         public int Bot_Token { get; set; } = 0;
 

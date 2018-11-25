@@ -54,30 +54,39 @@ namespace ALGAMES.MatrixBoardGames
             return (freePos.ToArray());
         }
 
+        /// <summary>
+        ///  Evaluate returns the estimated value of the current board.
+        ///  Returns int.MinValue if the current board makes the winId to loose. 
+        ///  Returns int.MaxValue if the current board makes the winID to win.
+        ///  Returns 0 if the current board is a draw.
+        ///  Returns 1 if the current board is not in a terminal status.
+        ///  </summary>
+        /// <param name="board"></param>
+        /// <param name="WinId"></param>
+        /// <param name="NumberOfMovsDone"></param>
+        /// <returns></returns>
         public int Evaluate(int[,] board, int WinId, int NumberOfMovsDone)
         {
-
             var nonFreePos = GetNonFreePos(board, NumberOfMovsDone);
             int result = -1;
             bool valWins = false;
             int val = -1;
             foreach (var pos in nonFreePos)
             {
-                var adjacents = GetAdjacentPositions(board, pos.Item1, pos.Item2);
+                var adjacent = GetAdjacentPositions(board, pos.Item1, pos.Item2);
                 val = board[pos.Item1, pos.Item2];
                 // 4 iterations at max.
-                foreach (var adj in adjacents)
+                foreach (var adj in adjacent)
                 {
-                    if (board[adj.Item1, adj.Item2] == val)
+                    if (board[adj.row, adj.col] == val)
                     {
-                        int drow, crow;
-                        PathDistance(pos, adj, out drow, out crow);
+                        var (drow, dcol) = PathDistance(pos, adj);
                         valWins = findPath(board, adj, WIN_ROW_LENGTH - 2, current =>
                           {
-                              Tuple<int, int> res = new Tuple<int, int>(current.Item1 + drow, current.Item2 + crow);
+                              (int row, int col) res = (current.Item1 + drow, current.Item2 + dcol);
                               if (checkInBounds(res, board))
                                   return (res);
-                              return (null);
+                              return ((null, 0));
                           });
                         if (valWins)
                             break;
@@ -89,30 +98,29 @@ namespace ALGAMES.MatrixBoardGames
             if (!valWins)
             {
                 if (nonFreePos.Count == board.GetLength(0) * board.GetLength(1))
-                    result = 3;
+                    result = 0;
                 else
-                    result = 2;
+                    result = 1;
 
             }
             else
             {
-                result = (val == WinId) ? 1 : 0;
+                result = (val == WinId) ? int.MaxValue : int.MinValue;
             }
             return (result);
         }
-        public List<Tuple<int, int>> GetNonFreePos(int[,] board, int NumberOfMovsDone)
+        public List<(int row, int col)> GetNonFreePos(int[,] board, int NumberOfMovsDone)
         {
             // TODO: Improve bad design!!.
-            List<Tuple<int, int>> nonFreePos = new List<Tuple<int, int>>();
+            List<(int row, int col)> nonFreePos = new List<(int row, int col)>();
             var freePos = GetFreePositions(board, NumberOfMovsDone);
             foreach (var pos in freePos)
             {
 
-                int i = pos.Item1 + 1;
-
+                int i = pos.row + 1;
                 while (i < board.GetLength(0))
                 {
-                    nonFreePos.Add(new Tuple<int, int>(i, pos.Item2));
+                    nonFreePos.Add((i, pos.column));
                     i++;
                 }
             }
@@ -123,7 +131,7 @@ namespace ALGAMES.MatrixBoardGames
                 {
                     for (int i = 0; i < board.GetLength(0); i++)
                     {
-                        nonFreePos.Add(new Tuple<int, int>(i, j));
+                        nonFreePos.Add((i, j));
                     }
                 }
             }
@@ -131,46 +139,46 @@ namespace ALGAMES.MatrixBoardGames
             return (nonFreePos);
         }
 
-        public bool checkInBounds(Tuple<int, int> pos, int[,] board)
+
+        public (int rowDis, int colDis) PathDistance((int row, int col) src, (int row, int col) des)
         {
-            bool inBounds = pos.Item1 >= 0 && pos.Item1 < board.GetLength(0) && pos.Item2 >= 0 && pos.Item2 < board.GetLength(1);
+            return ((des.row - src.row), (des.col - src.col));
+        }
+
+        public bool findPath(int[,] board, (int row, int col) current, int valLeft, Func<(int row, int col), (int? row, int col)> NextInPath)
+        {
+            if (valLeft == 0)
+                return (true);
+            var next = NextInPath(current);
+            if (next.Item1 == null)
+                return (false);
+            if (board[current.Item1, current.Item2] != board[(int)next.Item1, next.Item2])
+                return (false);
+            valLeft--;
+            return findPath(board, ((int)next.Item1, next.Item2), valLeft, NextInPath);
+        }
+
+        public bool checkInBounds((int row, int col) pos, int[,] board)
+        {
+            bool inBounds = pos.row >= 0 && pos.row < board.GetLength(0) && pos.col >= 0 && pos.col < board.GetLength(1);
             return (inBounds);
         }
 
-        public void PathDistance(Tuple<int, int> src, Tuple<int, int> des, out int RowDis, out int ColDis)
+        public List<(int row, int col)> GetAdjacentPositions(int[,] board, int i, int j)
         {
-            RowDis = des.Item1 - src.Item1;
-            ColDis = des.Item2 - src.Item2;
-        }
-
-        public bool findPath(int[,] board, Tuple<int, int> current, int NOfValsLeft, Func<Tuple<int, int>, Tuple<int, int>> NextInPath)
-        {
-            if (NOfValsLeft == 0)
-                return (true);
-            var next = NextInPath(current);
-            if (next == null)
-                return (false);
-            if (board[current.Item1, current.Item2] != board[next.Item1, next.Item2])
-                return (false);
-            NOfValsLeft--;
-            return findPath(board, next, NOfValsLeft, NextInPath);
-        }
-
-        public List<Tuple<int, int>> GetAdjacentPositions(int[,] board, int i, int j)
-        {
-            List<Tuple<int, int>> adjacents = new List<Tuple<int, int>>();
-            adjacents.Add(new Tuple<int, int>(i - 1, j));
-            adjacents.Add(new Tuple<int, int>(i - 1, j - 1));
-            adjacents.Add(new Tuple<int, int>(i - 1, j + 1));
-            adjacents.Add(new Tuple<int, int>(i + 1, j));
-            adjacents.Add(new Tuple<int, int>(i + 1, j + 1));
-            adjacents.Add(new Tuple<int, int>(i + 1, j - 1));
-            adjacents.Add(new Tuple<int, int>(i, j - 1));
-            adjacents.Add(new Tuple<int, int>(i, j + 1));
-            List<Tuple<int, int>> res = new List<Tuple<int, int>>();
-            foreach (var adj in adjacents)
+            List<(int row, int col)> adjacent = new List<(int row, int col)>();
+            adjacent.Add((i - 1, j));
+            adjacent.Add((i - 1, j - 1));
+            adjacent.Add((i - 1, j + 1));
+            adjacent.Add((i + 1, j));
+            adjacent.Add((i + 1, j + 1));
+            adjacent.Add((i + 1, j - 1));
+            adjacent.Add((i, j - 1));
+            adjacent.Add((i, j + 1));
+            List<(int, int)> res = new List<(int, int)>();
+            foreach (var adj in adjacent)
             {
-                if (adj.Item1 >= 0 && adj.Item1 < board.GetLength(0) && adj.Item2 >= 0 && adj.Item2 < board.GetLength(1))
+                if (checkInBounds(adj, board))
                 {
                     res.Add(adj);
                 }

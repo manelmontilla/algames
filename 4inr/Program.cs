@@ -1,5 +1,6 @@
 ﻿using System;
 using static System.Console;
+using CommandLine;
 using ALGAMES.PlayBots;
 
 namespace _4inr
@@ -9,25 +10,25 @@ namespace _4inr
         public static void Main(string[] args)
         {
             FourInARowCLBot bot = new FourInARowCLBot();
-            if (args.Length > 0)
+            Parser.Default.ParseArguments<Options>(args).WithParsed(o =>
             {
-                // start game from a file.
-                var str = System.IO.File.ReadAllText("game.json");
+                if (o.Resume == null)
+                {
+                    bot.Play();
+                    return;
+                }
+                var filePath = o.Resume;
+                var str = System.IO.File.ReadAllText(filePath);
                 var game = GameUtils.DeSerializeFromJson(str);
                 bot.Game = game;
-                if (args.Length > 1)
+                if (o.BackTo != null)
                 {
-
-                    int backto = int.Parse(args[1]);
-                    game.BackTo(backto);
+                    var back = (int)o.BackTo;
+                    game.BackTo(back);
                 }
                 bot.ResumeGame();
-            }
-            else
-            {
-                bot.Play();
-            }
+                return;
+            });
         }
-
     }
 }

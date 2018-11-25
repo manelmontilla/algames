@@ -50,7 +50,8 @@ namespace ALGAMES.PlayBots
                     WriteLine($"current board:\n");
                     Game.board.PrintToConsole();
                     Game.NextMovePlayerToken = Game.Opponent_Token;
-                    exit = EvaluateBotStatus(botMove.result);
+                    var res = b.Rules.Evaluate(Game.board, Game.Bot_Token, Game.NumberOfMovementsDone);
+                    exit = EvaluateStatus(res);
                 }
 
                 else
@@ -61,8 +62,8 @@ namespace ALGAMES.PlayBots
                     Game.NumberOfMovementsDone++;
                     WriteLine($"current board:\n");
                     Game.board.PrintToConsole();
-                    var res = b.Rules.Evaluate(Game.board, Game.Opponent_Token, Game.NumberOfMovementsDone);
-                    exit = EvaluateOpponentStatus(res);
+                    var res = b.Rules.Evaluate(Game.board, Game.Bot_Token, Game.NumberOfMovementsDone);
+                    exit = EvaluateStatus(res);
                     Game.NextMovePlayerToken = Game.Bot_Token;
                 }
 
@@ -75,7 +76,7 @@ namespace ALGAMES.PlayBots
             (int row, int col) pos = (-1, -1);
             while (!correct)
             {
-                WriteLine("Enter your movement in format row,col");
+                WriteLine("Enter your movement in format row,col. Type: 'save filepath' to save the game");
                 string movement = ReadLine();
                 bool okey;
                 pos = movement.MovementFromString(out okey);
@@ -86,17 +87,16 @@ namespace ALGAMES.PlayBots
                 else
                 {
                     if (IsSaveGameCommand(movement))
-                        SaveToFile(Game);
+                        SaveToFile(Game, movement);
                 }
             }
             return (pos);
         }
 
-        public void SaveToFile(FourInARowGame game)
+        public void SaveToFile(FourInARowGame game, string command)
         {
-            //TODO make working on widows put filename in a constant
+            var fileName = command.Replace("save ", "");
             var val = game.SerializeToJson();
-            string fileName = $"game.json";
             File.WriteAllText(fileName, val);
             WriteLine($"Game saved to {fileName}");
         }
@@ -104,41 +104,28 @@ namespace ALGAMES.PlayBots
         private bool IsSaveGameCommand(string input)
         {
             bool ret = false;
-            ret = input.IndexOf("save", StringComparison.OrdinalIgnoreCase) >= 0;
+            ret = input.StartsWith("save", StringComparison.OrdinalIgnoreCase);
             return (ret);
         }
 
-        private bool EvaluateBotStatus(int result)
+        private bool EvaluateStatus(int result)
         {
             bool exit = false;
             switch (result)
             {
-                case 0:
-                    if (this.MovementsLeft > 0)
-                    {
-                        WriteLine("it seems you are going to win well done!!");
-
-                    }
-                    else
-                    {
-                        WriteLine("You win!! well done");
-                        exit = true;
-                    }
+                case int.MinValue:
+                    WriteLine("You win!! well done");
+                    exit = true;
                     break;
-                case 1:
-
+                case int.MaxValue:
                     WriteLine("I win!!");
                     exit = true;
-
                     break;
-                case 3:
-
+                case 0:
                     WriteLine("We tied!!");
                     exit = true;
-
                     break;
                 default:
-
                     break;
             }
 
@@ -150,15 +137,15 @@ namespace ALGAMES.PlayBots
             bool exit = false;
             switch (result)
             {
-                case 0:
+                case int.MaxValue:
                     WriteLine("I win this time!!");
                     exit = true;
                     break;
-                case 1:
+                case int.MinValue:
                     WriteLine("You win well done!!");
                     exit = true;
                     break;
-                case 3:
+                case 0:
                     WriteLine("We tied!!");
                     exit = true;
                     break;
@@ -170,9 +157,8 @@ namespace ALGAMES.PlayBots
             return (exit);
         }
 
-        // Returns nextmove if the game is not finished, otherwise null.  
-        // Next will be 0 if oponent wins, 1 if bot wins, 2 not resolved,3 if draw. 
-        // if the game is finished then result will be -1 
+
+        // Return the bot chosen movement with the calculated expected outcome. 
         public (int result, (int, int) pos) GetBotMove()
         {
             WriteLine("Bot deciding next movement..");
