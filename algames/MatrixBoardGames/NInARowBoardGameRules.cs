@@ -7,7 +7,7 @@ namespace ALGAMES.MatrixBoardGames
         const int WIN_ROW_LENGTH = 4;
         public (int row, int column)[] GetFreePositions(int[,] board, int NumberOfMovesDone)
         {
-            // TODO: Improve. After  NumberOfMovesDone (board.GetLength(0)* board.GetLength(1))/2 
+            // TODO: Improve. After NumberOfMovesDone (board.GetLength(0)* board.GetLength(1))/2 
             // start visiting de rows at board.GetLength(1)-1.
             List<(int row, int col)> freePos = new List<(int, int)>();
             Queue<int> ColsToReviewForFreePlaces = new Queue<int>();

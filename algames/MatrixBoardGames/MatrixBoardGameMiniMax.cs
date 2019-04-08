@@ -18,7 +18,7 @@ namespace ALGAMES.MatrixBoardGames
         ///  If the game is finished returns null.
         /// </summary>
         /// <param name="CurrentBoard">The current board with all the movements made by the players.</param>
-        /// <param name="NumberOfMovsDone">Ther number of movements already done, taking into account both players.</param>
+        /// <param name="NumberOfMovsDone">The number of movements already done, taking into account both players.</param>
         /// <param name="SearchDepth">The maximum depth the program should expand the decission tree.</param>
         /// <param name="WinId">ID of the player to maximize the output.</param>
         /// <param name="LoseId">ID of the player to minimize the output.</param>
