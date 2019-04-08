@@ -110,7 +110,7 @@ namespace ALGAMES.PlayBots
             ser.Serialize(sw, game);
             return (sw.ToString());
         }
-        public static FourInARowGame DeSerializeFromJson(string str)
+        public static FourInARowGame DeserializeFromJson(string str)
         {
             FourInARowGame game;
             game = Newtonsoft.Json.JsonConvert.DeserializeObject<FourInARowGame>(str);

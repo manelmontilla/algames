@@ -19,7 +19,7 @@ namespace _4inr
                 }
                 var filePath = o.Resume;
                 var str = System.IO.File.ReadAllText(filePath);
-                var game = GameUtils.DeSerializeFromJson(str);
+                var game = GameUtils.DeserializeFromJson(str);
                 bot.Game = game;
                 if (o.BackTo != null)
                 {
